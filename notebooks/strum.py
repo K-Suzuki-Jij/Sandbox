@@ -2,6 +2,7 @@
 # https://qiita.com/hiro949/items/d202f748ec87ed3806b2
 
 import numpy as np
+import math
 from tqdm import tqdm
 
 class Strum():
@@ -43,8 +44,8 @@ class Strum():
         lim0 = +np.infty
         lim1 = -np.infty
         for i in range(0, n - 2):
-            lim0 = min(lim0, a[i+1] - (b[i] + b[i+1]))
-            lim1 = max(lim1, a[i+1] + (b[i] + b[i+1]))
+            lim0 = min(lim0, abs(a[i+1]) - (abs(b[i]) + abs(b[i+1])))
+            lim1 = max(lim1, abs(a[i+1]) + (abs(b[i]) + abs(b[i+1])))
         eig_arr = np.array([lim1])
         #i番目に大きい固有値を二分探索で大きい順に求める
         #上限の値はi-1番目に大きい固有値を使えばよい
@@ -53,7 +54,8 @@ class Strum():
             x0 = lim0
             x1 = lim1
             pp = 1.0
-            while x1 - x0 > self.th:
+            while abs(x1 - x0) > self.th:
+                print(abs(x1 - x0))
                 pp = x1 - x0
                 piv = (x0 + x1)*0.5
                 w = self.sign_flip(piv, n, a, b)
@@ -61,9 +63,9 @@ class Strum():
                     x1 = piv
                 else: 
                     x0 = piv
-                if pp - (x1 - x0) < self.th:
+                if abs(pp - (x1 - x0)) < self.th:
+                    print("fdfsafd")
                     break
-                #print(pp - (x1 - x0))
             eig_arr = np.append(eig_arr, (x1 + x0)*0.5)
             #print(x1)
         return eig_arr[1:]
@@ -73,8 +75,8 @@ class Strum():
         lim0 = +np.infty
         lim1 = -np.infty
         for i in range(0, n - 2):
-            lim0 = min(lim0, a[i+1] - (b[i] + b[i+1]))
-            lim1 = max(lim1, a[i+1] + (b[i] + b[i+1]))
+            lim0 = min(lim0, a[i+1] - (abs(b[i]) + abs(b[i+1])))
+            lim1 = max(lim1, a[i+1] + (abs(b[i]) + abs(b[i+1])))
         x0 = lim0
         x1 = lim1
         pp = 1.0
@@ -88,7 +90,35 @@ class Strum():
                 x0 = piv
             if pp - (x1 - x0) < self.th:
                 break
-        return (x1 + x0)*0.5
+        
+        eig_val = (x1 + x0)*0.5
+        # Calc eigen vec
+        #c0 = 1.0
+        #c1 = (eig_val - a[0])/b[0]
+        #c2 = ((eig_val - a[1])*c1 - b[0])/b[1]
+        #c3 = b[2]*c2/(eig_val - a[3])
+        #vec = [c0, c1, c2, c3]
+        
+        def normalize(vec):
+            norm = 0.0
+            for i in range(len(vec)):
+                norm += vec[i]*vec[i]
+
+            for i in range(len(vec)):
+                vec[i] = vec[i]/math.sqrt(norm)
+
+        vec = [1]
+        vec.append((eig_val - a[0])/b[0])
+        for i in range(0, n - 2):
+            c0 = vec[i]
+            c1 = vec[i+1]
+            c2 = ((eig_val - a[i+1])*c1 - b[i]*c0)/b[i+1]
+            vec.append(c2)
+            normalize(vec)
+
+        normalize(vec)
+
+        return eig_val, vec
 
 def tridiag(n,a,b):
     mat = np.diag(a)
