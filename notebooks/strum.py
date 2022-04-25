@@ -5,6 +5,13 @@ import numpy as np
 import math
 from tqdm import tqdm
 
+def tridiag(n,a,b):
+    mat = np.diag(a)
+    for i in range(n-1):
+        mat[i][i+1]=b[i]
+        mat[i+1][i]=b[i]
+    return mat
+
 class Strum():
     def __init__(self,th):
         #実数の探索なので閾値を決める
@@ -92,12 +99,7 @@ class Strum():
                 break
         
         eig_val = (x1 + x0)*0.5
-        # Calc eigen vec
-        #c0 = 1.0
-        #c1 = (eig_val - a[0])/b[0]
-        #c2 = ((eig_val - a[1])*c1 - b[0])/b[1]
-        #c3 = b[2]*c2/(eig_val - a[3])
-        #vec = [c0, c1, c2, c3]
+        
         
         def normalize(vec):
             norm = 0.0
@@ -107,6 +109,7 @@ class Strum():
             for i in range(len(vec)):
                 vec[i] = vec[i]/math.sqrt(norm)
 
+        """
         vec = [1]
         vec.append((eig_val - a[0])/b[0])
         for i in range(0, n - 2):
@@ -114,15 +117,21 @@ class Strum():
             c1 = vec[i+1]
             c2 = ((eig_val - a[i+1])*c1 - b[i]*c0)/b[i+1]
             vec.append(c2)
-            normalize(vec)
 
         normalize(vec)
+        """
+
+        vec = np.random.uniform(-1, 1, n)
+        normalize(vec)
+
+        # Inverse Iteration
+        delta = 1e-11
+        mat = tridiag(n, a - eig_val + delta, b)
+        for _ in range(5):
+            new_vec = np.linalg.solve(mat, vec)
+            normalize(new_vec)
+            #print(np.dot(new_vec, vec))
+            vec = new_vec
 
         return eig_val, vec
 
-def tridiag(n,a,b):
-    mat = np.diag(a)
-    for i in range(n-1):
-        mat[i][i+1]=b[i]
-        mat[i+1][i]=b[i]
-    return mat

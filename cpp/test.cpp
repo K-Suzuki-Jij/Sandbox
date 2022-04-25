@@ -2,6 +2,8 @@
 #include <iostream>
 #include <omp.h>
 #include <chrono>
+#include <limits>
+#include <quadmath.h>
 
 template<typename T>
 T InnerProd(const std::vector<T> &vec) {
@@ -21,7 +23,7 @@ T InnerProd(const std::vector<T> &vec) {
 
 int main(void) {
    
-   const std::int64_t N = 100000;
+   const std::int64_t N = 10000;
    std::vector<double> v_d(N, 1.0);
    
    auto start = std::chrono::system_clock::now();
@@ -30,7 +32,7 @@ int main(void) {
    double elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000.0;
 
    std::cout << ans << ": " << elapsed << std::endl;
-   
+   std::cout << std::numeric_limits<long double>::epsilon() << std::endl;
    return 0;
 }
 
