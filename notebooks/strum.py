@@ -27,21 +27,23 @@ class Strum():
             #小行列式の漸化式
             p2 = (x - a[i+1])*p1 - b[i]*b[i]*p0
             #print(p0, p1, p2)
-            if (p0 < 0 and p1 > 0) or (p0 > 0 and p1 < 0):
-                cnt += 1
+            c1 = (p0 < 0 and p1 > 0) or (p0 > 0 and p1 < 0)
+
             #正->0->負/負->0->正だった場合
-            elif abs(p1) < self.th and ((p0 < 0 and p2 > 0) or (p0 > 0 and p2 < 0)):
+            c2 = abs(p1) < self.th and ((p0 < 0 and p2 > 0) or (p0 > 0 and p2 < 0))
+            if c1 or c2:
                 cnt += 1
-            if i < n - 2:
-                p0=p1
-                p1=p2
-            #p0 = p0/abs(p0)
-            #p1 = p1/abs(p1)
-            p1 = p1/p0
+            
+            #p0=p1
+            #p1=p2
+            #p1 = p1/p0
+            #p0 = 1
+
+            p1 = p2/p1
             p0 = 1
             #print(p0, p1, p2)
         #最後の端の部分
-        if (p1 < 0 and p2 > 0) or (p1 > 0 and p2 < 0):
+        if (p0 < 0 and p1 > 0) or (p0 > 0 and p1 < 0):
             #print(p1, p2)
             cnt += 1
         return cnt
